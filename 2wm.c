@@ -7,13 +7,6 @@ Display *dpy;
 Window root;
 XRRScreenResources *sres;
 
-KeyCode grab_keycode(const char *key)
-{
-    KeyCode code = XKeysymToKeycode(dpy, XStringToKeysym(key));
-    XGrabKey(dpy, code, Mod4Mask, root, True, GrabModeAsync, GrabModeAsync);
-    return code;
-}
-
 void full_screen(Window win)
 {
     XWindowAttributes wa;
@@ -43,7 +36,6 @@ int main(int argc, char *argv[])
 {
     if (!(dpy = XOpenDisplay(0x0))) return 1;
     root = DefaultRootWindow(dpy);
-
     sres = XRRGetScreenResources(dpy, root);
 
     Cursor cursor = XCreateFontCursor(dpy, XC_left_ptr);
@@ -64,10 +56,16 @@ int main(int argc, char *argv[])
         None, None
     );
 
-    const KeyCode full = grab_keycode("f");
-    const KeyCode next = grab_keycode("Tab");
-    const KeyCode kill = grab_keycode("k");
-    const KeyCode exit = grab_keycode("x");
+    const KeyCode full = XKeysymToKeycode(dpy, XK_f);
+    const KeyCode next = XKeysymToKeycode(dpy, XK_Tab);
+    const KeyCode kill = XKeysymToKeycode(dpy, XK_k);
+    const KeyCode quit = XKeysymToKeycode(dpy, XK_q);
+
+    const KeyCode *code[] = { &full, &next, &kill, &quit };
+    for (int i = 0; i < sizeof(code) / sizeof(code[0]); ++i)
+    {
+        XGrabKey(dpy, *code[i], Mod4Mask, root, True, GrabModeAsync, GrabModeAsync);
+    }
 
     XButtonEvent move = {.subwindow = None};
     XWindowAttributes attrs;
@@ -112,7 +110,7 @@ int main(int argc, char *argv[])
             else if (ev.xkey.keycode == kill)
                 XKillClient(dpy, ev.xkey.subwindow);
 
-            else if (ev.xkey.keycode == exit) break;
+            else if (ev.xkey.keycode == quit) break;
         }
     }
 
