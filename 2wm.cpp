@@ -1,23 +1,24 @@
+#include <initializer_list>
+
 #include <unistd.h>
 #include <X11/cursorfont.h>
 #include <X11/extensions/Xrandr.h>
 #include <X11/Xlib.h>
 
-Display *dpy;
+Display* dpy;
 Window root;
-XRRScreenResources *sres;
+XRRScreenResources* sres;
 
 void full_screen(Window win)
 {
     XWindowAttributes wa;
     XGetWindowAttributes(dpy, win, &wa);
 
-    int cx = wa.x + wa.width / 2;
-    int cy = wa.y + wa.height / 2;
+    auto cx = wa.x + wa.width / 2;
+    auto cy = wa.y + wa.height / 2;
 
-    XRRCrtcInfo *ci;
-    for (int i = 0; i < sres->ncrtc; ++i)
-        if ((ci = XRRGetCrtcInfo(dpy, sres, sres->crtcs[i])))
+    for (auto i = 0; i < sres->ncrtc; ++i)
+        if (auto ci = XRRGetCrtcInfo(dpy, sres, sres->crtcs[i]))
         {
             if (ci->noutput > 0)
             {
@@ -38,7 +39,7 @@ int main(int argc, char *argv[])
     root = DefaultRootWindow(dpy);
     sres = XRRGetScreenResources(dpy, root);
 
-    Cursor cursor = XCreateFontCursor(dpy, XC_left_ptr);
+    auto cursor = XCreateFontCursor(dpy, XC_left_ptr);
     XDefineCursor(dpy, root, cursor);
 
     if (argc > 1 && fork() == 0)
@@ -56,18 +57,17 @@ int main(int argc, char *argv[])
         None, None
     );
 
-    const KeyCode full = XKeysymToKeycode(dpy, XK_f);
-    const KeyCode next = XKeysymToKeycode(dpy, XK_Tab);
-    const KeyCode kill = XKeysymToKeycode(dpy, XK_k);
-    const KeyCode quit = XKeysymToKeycode(dpy, XK_q);
+    const auto full = XKeysymToKeycode(dpy, XK_f);
+    const auto next = XKeysymToKeycode(dpy, XK_Tab);
+    const auto kill = XKeysymToKeycode(dpy, XK_k);
+    const auto quit = XKeysymToKeycode(dpy, XK_q);
 
-    const KeyCode *code[] = { &full, &next, &kill, &quit };
-    for (int i = 0; i < sizeof(code) / sizeof(code[0]); ++i)
+    for (auto code : { full, next, kill, quit })
     {
-        XGrabKey(dpy, *code[i], Mod4Mask, root, True, GrabModeAsync, GrabModeAsync);
+        XGrabKey(dpy, code, Mod4Mask, root, True, GrabModeAsync, GrabModeAsync);
     }
 
-    XButtonEvent move = {.subwindow = None};
+    XButtonEvent move{.subwindow = None};
     XWindowAttributes attrs;
 
     XEvent ev;
@@ -83,13 +83,13 @@ int main(int argc, char *argv[])
         }
         else if (ev.type == MotionNotify)
         {
-            int dx = ev.xmotion.x_root - move.x_root;
-            int dy = ev.xmotion.y_root - move.y_root;
+            auto dx = ev.xmotion.x_root - move.x_root;
+            auto dy = ev.xmotion.y_root - move.y_root;
 
             if (move.state & ShiftMask)
             {
-                int w = attrs.width + dx;
-                int h = attrs.height + dy;
+                auto w = attrs.width + dx;
+                auto h = attrs.height + dy;
                 if (w > 0 && h > 0) XResizeWindow(dpy, move.subwindow, w, h);
             }
             else XMoveWindow(dpy, move.subwindow, attrs.x + dx, attrs.y + dy);
