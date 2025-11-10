@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.16) # focal
-project(2wm VERSION 0.0 LANGUAGES C)
+project(2wm VERSION 0.0 LANGUAGES CXX)
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
@@ -9,7 +9,7 @@ pkg_search_module(xrandr REQUIRED IMPORTED_TARGET xrandr)
 
 include(GNUInstallDirs)
 
-add_executable(2wm 2wm.c)
+add_executable(2wm 2wm.cpp)
 target_link_libraries(2wm PRIVATE PkgConfig::x11 PkgConfig::xrandr)
 
 install(TARGETS 2wm DESTINATION ${CMAKE_INSTALL_BINDIR})
