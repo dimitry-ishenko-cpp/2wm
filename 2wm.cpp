@@ -1,6 +1,8 @@
 #include <initializer_list>
 
-#include <unistd.h>
+#include <sys/select.h> // select
+#include <sys/syscall.h> // pidfd_open, syscall
+#include <unistd.h> // execvp, fork
 #include <X11/cursorfont.h>
 #include <X11/extensions/Xrandr.h>
 #include <X11/Xlib.h>
@@ -8,7 +10,6 @@
 Display* dpy;
 Window root;
 XRRScreenResources* sres;
-bool done = false;
 
 auto get(KeySym sym){ return XKeysymToKeycode(dpy, sym); };
 void grab(KeyCode code){ XGrabKey(dpy, code, Mod4Mask, root, True, GrabModeAsync, GrabModeAsync); };
@@ -50,7 +51,8 @@ int main(int argc, char *argv[])
     auto cursor = XCreateFontCursor(dpy, XC_left_ptr);
     XDefineCursor(dpy, root, cursor);
 
-    if (argc > 1 && fork() == 0)
+    pid_t child = 0;
+    if (argc > 1 && (child = fork()) == 0)
     {
         execvp(argv[1], &argv[1]);
         return 1;
@@ -62,63 +64,83 @@ int main(int argc, char *argv[])
     grab(Button1, Mod4Mask);
     grab(Button1, Mod4Mask|ShiftMask);
 
+    fd_set fds;
+    auto fd_c = syscall(SYS_pidfd_open, child, 0);
+    auto fd_x = ConnectionNumber(dpy);
+    auto fd_max = fd_c > fd_x ? fd_c : fd_x;
+
     XButtonEvent move{.subwindow = None};
     XWindowAttributes attrs;
 
-    XEvent ev;
-    while (!done && !XNextEvent(dpy, &ev))
-        switch (ev.type)
+    for (bool done = false; !done;)
+    {
+        FD_ZERO(&fds);
+        if (fd_c > 0) FD_SET(fd_c, &fds);
+        FD_SET(fd_x, &fds);
+
+        XFlush(dpy);
+        select(fd_max + 1, &fds, NULL, NULL, NULL);
+        if (FD_ISSET(fd_c, &fds)) done = true;
+
+        while (XPending(dpy))
         {
-        case KeyPress:
-            if (ev.xkey.keycode == quit)
-                done = true;
+            XEvent ev;
+            XNextEvent(dpy, &ev);
 
-            else if (ev.xkey.keycode == next)
+            switch (ev.type)
             {
-                XCirculateSubwindowsUp(dpy, root);
-                XSetInputFocus(dpy, ev.xkey.window, RevertToParent, CurrentTime);
-            }
-            else if (ev.xkey.subwindow)
-            {
-                if (ev.xkey.keycode == full)
-                    full_screen(ev.xkey.subwindow);
+            case KeyPress:
+                if (ev.xkey.keycode == quit)
+                    done = true;
 
-                else if (ev.xkey.keycode == kill)
-                    XKillClient(dpy, ev.xkey.subwindow);
-            }
-            break;
-
-        case ButtonPress:
-            if (ev.xbutton.subwindow)
-            {
-                XRaiseWindow(dpy, ev.xbutton.subwindow);
-                XSetInputFocus(dpy, ev.xbutton.subwindow, RevertToParent, CurrentTime);
-
-                move = ev.xbutton;
-                XGetWindowAttributes(dpy, move.subwindow, &attrs);
-            }
-            break;
-
-        case MotionNotify:
-            if (ev.xmotion.subwindow)
-            {
-                auto dx = ev.xmotion.x_root - move.x_root;
-                auto dy = ev.xmotion.y_root - move.y_root;
-
-                if (move.state & ShiftMask)
+                else if (ev.xkey.keycode == next)
                 {
-                    auto w = attrs.width + dx;
-                    auto h = attrs.height + dy;
-                    if (w > 0 && h > 0) XResizeWindow(dpy, move.subwindow, w, h);
+                    XCirculateSubwindowsUp(dpy, root);
+                    XSetInputFocus(dpy, ev.xkey.window, RevertToParent, CurrentTime);
                 }
-                else XMoveWindow(dpy, move.subwindow, attrs.x + dx, attrs.y + dy);
+                else if (ev.xkey.subwindow)
+                {
+                    if (ev.xkey.keycode == full)
+                        full_screen(ev.xkey.subwindow);
+
+                    else if (ev.xkey.keycode == kill)
+                        XKillClient(dpy, ev.xkey.subwindow);
+                }
+                break;
+
+            case ButtonPress:
+                if (ev.xbutton.subwindow)
+                {
+                    XRaiseWindow(dpy, ev.xbutton.subwindow);
+                    XSetInputFocus(dpy, ev.xbutton.subwindow, RevertToParent, CurrentTime);
+
+                    move = ev.xbutton;
+                    XGetWindowAttributes(dpy, move.subwindow, &attrs);
+                }
+                break;
+
+            case MotionNotify:
+                if (ev.xmotion.subwindow)
+                {
+                    auto dx = ev.xmotion.x_root - move.x_root;
+                    auto dy = ev.xmotion.y_root - move.y_root;
+
+                    if (move.state & ShiftMask)
+                    {
+                        auto w = attrs.width + dx;
+                        auto h = attrs.height + dy;
+                        if (w > 0 && h > 0) XResizeWindow(dpy, move.subwindow, w, h);
+                    }
+                    else XMoveWindow(dpy, move.subwindow, attrs.x + dx, attrs.y + dy);
+                }
+                break;
+
+            case ButtonRelease:
+                move.subwindow = None;
+                break;
             }
-            break;
-        
-        case ButtonRelease:
-            move.subwindow = None;
-            break;
         }
+    }
 
     XRRFreeScreenResources(sres);
     XCloseDisplay(dpy);
