@@ -27,19 +27,19 @@ Alternatively, you can start **2wm** standalone by running:
 2wm
 ```
 
-and launch applications inside it however you normally would (eg, `DISPLAY=:0 firefox`).
+and launch applications inside it as you normally would (eg, `DISPLAY=:0 firefox &`).
 
 The following shortcuts can be used with **2wm**:
 
-| Shortcut                                   | Action                                           |
-|--------------------------------------------|--------------------------------------------------|
-| <kbd>Meta</kbd> + 🖱️ click                 | Focus and raise the window under the cursor      |
-| <kbd>Meta</kbd> + 🖱️ click-and-drag        | Move the window by dragging                      |
-| <kbd>Meta</kbd> <kbd>Shift</kbd> + 🖱️ click-and-drag | Resize the window by dragging          |
-| <kbd>Meta</kbd> + <kbd>Tab</kbd>           | Cycle (focus and raise) through all open windows |
-| <kbd>Meta</kbd> + <kbd>F</kbd>             | Resize the window to full-screen                 |
-| <kbd>Meta</kbd> + <kbd>K</kbd>             | Close (kill) the window under the cursor         |
-| <kbd>Meta</kbd> + <kbd>Q</kbd>             | Quit **2wm** and stop the X server               |
+| Shortcut                              | Action                                            |
+|---------------------------------------|---------------------------------------------------|
+| <kbd>Meta</kbd> + 🖱️ click            | Focus and raise the window under the cursor       |
+| <kbd>Meta</kbd> + 🖱️ click-and-drag   | Move the window by dragging                       |
+| <kbd>Meta</kbd> <kbd>Shift</kbd> + 🖱️ click-and-drag | Resize the window by dragging      |
+| <kbd>Meta</kbd> + <kbd>Tab</kbd>      | Cycle (focus and raise) through all open windows  |
+| <kbd>Meta</kbd> + <kbd>F</kbd>        | Resize the window to full-screen                  |
+| <kbd>Meta</kbd> + <kbd>K</kbd>        | Close (kill) the window under the cursor          |
+| <kbd>Meta</kbd> + <kbd>Q</kbd>        | Quit **2wm** and stop the X server                |
 
 ## Installation
 
@@ -48,7 +48,7 @@ The following shortcuts can be used with **2wm**:
 Ubuntu:
 
 ```shell
-sudo add-apt-repository ppa:ppa-verse/package
+sudo add-apt-repository ppa:ppa-verse/dev
 sudo apt install 2wm
 ```
 
