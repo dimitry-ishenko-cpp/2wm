@@ -43,7 +43,59 @@ The following shortcuts can be used with **2wm**:
 
 ## Installation
 
-TODO
+### Binary
+
+Ubuntu:
+
+```shell
+sudo add-apt-repository ppa:ppa-verse/package
+sudo apt install 2wm
+```
+
+Debian:
+```shell
+p=2wm v=0.0
+wget https://github.com/dimitry-ishenko-cpp/${p}/releases/download/${v}/${p}_${v}_amd64.deb
+sudo apt install ./${p}_${v}_amd64.deb
+```
+
+RaspberryPi:
+
+```shell
+p=2wm v=0.0
+wget https://github.com/dimitry-ishenko-cpp/${p}/releases/download/${v}/${p}_${v}_arm64.deb
+sudo apt install ./${p}_${v}_arm64.deb
+```
+
+### From source
+
+Stable version (requires [_CMake_](https://cmake.org/) >= 3.16, _libx11-dev_,
+_libxrandr-dev_ and [_pkgconf_](http://pkgconf.org/)):
+
+```shell
+p=2wm v=0.0
+wget https://github.com/dimitry-ishenko-cpp/${p}/archive/v${v}.tar.gz
+tar xzf v${v}.tar.gz
+mkdir ${p}-${v}/build
+cd ${p}-${v}/build
+cmake ..
+make
+sudo make install
+```
+
+Latest master (requires [_git_](https://git-scm.com/),
+[_CMake_](https://cmake.org/) >= 3.16, _libx11-dev_, _libxrandr-dev_ and
+[_pkgconf_](http://pkgconf.org/)):
+
+```shell
+p=2wm
+git clone --recursive https://github.com/dimitry-ishenko-cpp/${p}.git
+mkdir ${p}/build
+cd ${p}/build
+cmake ..
+make
+sudo make install
+```
 
 ## Authors
 
