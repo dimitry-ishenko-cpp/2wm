@@ -45,8 +45,7 @@ int main(int argc, char *argv[])
     root = DefaultRootWindow(dpy);
     auto ress = scrn_ress(XRRGetScreenResources(dpy, root), &XRRFreeScreenResources);
 
-    auto cursor = XCreateFontCursor(dpy, XC_left_ptr);
-    XDefineCursor(dpy, root, cursor);
+    XDefineCursor(dpy, root, XCreateFontCursor(dpy, XC_left_ptr));
 
     pid_t child = 0;
     if (argc > 1 && (child = fork()) == 0)
