@@ -10,7 +10,6 @@
 
 Display* dpy;
 Window root;
-XRRScreenResources* sres;
 
 auto get(KeySym sym){ return XKeysymToKeycode(dpy, sym); };
 void grab(KeyCode code){ XGrabKey(dpy, code, Mod4Mask, root, True, GrabModeAsync, GrabModeAsync); };
@@ -19,9 +18,10 @@ void grab(int button, int mask){ XGrabButton(dpy, button, mask, root, True,
     ButtonPressMask|ButtonReleaseMask|PointerMotionMask, GrabModeAsync, GrabModeAsync, None, None);
 };
 
+using scrn_ress = std::unique_ptr<XRRScreenResources, void(*)(XRRScreenResources*)>;
 using crtc_info = std::unique_ptr<XRRCrtcInfo, void(*)(XRRCrtcInfo*)>;
 
-void full_screen(Window win)
+void full_screen(Window win, scrn_ress& ress)
 {
     XWindowAttributes wa;
     XGetWindowAttributes(dpy, win, &wa);
@@ -29,8 +29,8 @@ void full_screen(Window win)
     auto cx = wa.x + wa.width / 2;
     auto cy = wa.y + wa.height / 2;
 
-    for (auto i = 0; i < sres->ncrtc; ++i)
-        if (auto ci = crtc_info(XRRGetCrtcInfo(dpy, sres, sres->crtcs[i]), &XRRFreeCrtcInfo))
+    for (auto i = 0; i < ress->ncrtc; ++i)
+        if (auto ci = crtc_info(XRRGetCrtcInfo(dpy, &*ress, ress->crtcs[i]), &XRRFreeCrtcInfo))
             if (ci->noutput > 0)
                 if (cx >= ci->x && cx < ci->x + ci->width && cy >= ci->y && cy < ci->y + ci->height)
                 {
@@ -43,7 +43,7 @@ int main(int argc, char *argv[])
 {
     if (!(dpy = XOpenDisplay(0x0))) return 1;
     root = DefaultRootWindow(dpy);
-    sres = XRRGetScreenResources(dpy, root);
+    auto ress = scrn_ress(XRRGetScreenResources(dpy, root), &XRRFreeScreenResources);
 
     auto cursor = XCreateFontCursor(dpy, XC_left_ptr);
     XDefineCursor(dpy, root, cursor);
@@ -98,7 +98,7 @@ int main(int argc, char *argv[])
                 else if (ev.xkey.subwindow)
                 {
                     if (ev.xkey.keycode == full)
-                        full_screen(ev.xkey.subwindow);
+                        full_screen(ev.xkey.subwindow, ress);
 
                     else if (ev.xkey.keycode == kill)
                         XKillClient(dpy, ev.xkey.subwindow);
@@ -139,7 +139,6 @@ int main(int argc, char *argv[])
         }
     }
 
-    XRRFreeScreenResources(sres);
     XCloseDisplay(dpy);
     return 0;
 }
