@@ -1,5 +1,24 @@
-2wm (0.1) UNRELEASED; urgency=medium
+2wm (0.1) unstable; urgency=medium
 
-  * Initial release.
+  * Prepare for v0.1
+  * Add installation instructions
+  * Add workflows for Debian packages
+  * Add Debian packaging
+  * Localize scrn_ress
+  * Tweak
+  * Update README.md
+  * Add wrapper script
+  * Fix for child-less mode
+  * Refactor
+  * Refactor
+  * Refactor
+  * Quit with the child
+  * Refactor
+  * Check for subwindow
+  * Use c++
+  * 2wm.c => 2wm.cpp
+  * Less cryptic key grab
+  * Import project
+  * Initial commit
 
- -- Dimitry Ishenko <dimitry.ishenko@gmail.com>  Tue, 11 Nov 2025 17:10:28 -0500
+ -- Dimitry Ishenko <dimitry.ishenko@gmail.com>  Tue, 11 Nov 2025 18:04:33 -0500
