@@ -54,7 +54,7 @@ sudo apt install 2wm
 
 Debian:
 ```shell
-p=2wm v=0.0
+p=2wm v=0.1
 wget https://github.com/dimitry-ishenko-cpp/${p}/releases/download/${v}/${p}_${v}_amd64.deb
 sudo apt install ./${p}_${v}_amd64.deb
 ```
@@ -62,7 +62,7 @@ sudo apt install ./${p}_${v}_amd64.deb
 RaspberryPi:
 
 ```shell
-p=2wm v=0.0
+p=2wm v=0.1
 wget https://github.com/dimitry-ishenko-cpp/${p}/releases/download/${v}/${p}_${v}_arm64.deb
 sudo apt install ./${p}_${v}_arm64.deb
 ```
@@ -73,7 +73,7 @@ Stable version (requires [_CMake_](https://cmake.org/) >= 3.16, _libx11-dev_,
 _libxrandr-dev_ and [_pkgconf_](http://pkgconf.org/)):
 
 ```shell
-p=2wm v=0.0
+p=2wm v=0.1
 wget https://github.com/dimitry-ishenko-cpp/${p}/archive/v${v}.tar.gz
 tar xzf v${v}.tar.gz
 mkdir ${p}-${v}/build
