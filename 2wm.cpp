@@ -27,7 +27,7 @@ void full_screen(Window win, scrn_ress& ress)
     XGetWindowAttributes(dpy, win, &wa);
 
     auto cx = wa.x + wa.width / 2;
-    auto cy = wa.y + wa.height / 2;
+    auto cy = wa.y + wa.height/ 2;
 
     for (auto i = 0; i < ress->ncrtc; ++i)
         if (auto ci = crtc_info(XRRGetCrtcInfo(dpy, &*ress, ress->crtcs[i]), &XRRFreeCrtcInfo))
@@ -124,7 +124,7 @@ int main(int argc, char *argv[])
                     if (move.state & ShiftMask)
                     {
                         auto w = attrs.width + dx;
-                        auto h = attrs.height + dy;
+                        auto h = attrs.height+ dy;
                         if (w > 0 && h > 0) XResizeWindow(dpy, move.subwindow, w, h);
                     }
                     else XMoveWindow(dpy, move.subwindow, attrs.x + dx, attrs.y + dy);
