@@ -21,8 +21,10 @@ void grab(int button, int mask){ XGrabButton(dpy, button, mask, root, True,
 using scrn_ress = std::unique_ptr<XRRScreenResources, void(*)(XRRScreenResources*)>;
 using crtc_info = std::unique_ptr<XRRCrtcInfo, void(*)(XRRCrtcInfo*)>;
 
-void full_screen(Window win, scrn_ress& ress)
+void full_screen(Window win)
 {
+    auto ress = scrn_ress{XRRGetScreenResources(dpy, root), &XRRFreeScreenResources};
+
     XWindowAttributes wa;
     XGetWindowAttributes(dpy, win, &wa);
 
@@ -30,7 +32,7 @@ void full_screen(Window win, scrn_ress& ress)
     auto cy = wa.y + wa.height/ 2;
 
     for (auto i = 0; i < ress->ncrtc; ++i)
-        if (auto ci = crtc_info(XRRGetCrtcInfo(dpy, &*ress, ress->crtcs[i]), &XRRFreeCrtcInfo))
+        if (auto ci = crtc_info{XRRGetCrtcInfo(dpy, &*ress, ress->crtcs[i]), &XRRFreeCrtcInfo})
             if (ci->noutput > 0)
                 if (cx >= ci->x && cx < ci->x + ci->width && cy >= ci->y && cy < ci->y + ci->height)
                 {
@@ -43,8 +45,6 @@ int main(int argc, char *argv[])
 {
     if (!(dpy = XOpenDisplay(0x0))) return 1;
     root = DefaultRootWindow(dpy);
-    auto ress = scrn_ress(XRRGetScreenResources(dpy, root), &XRRFreeScreenResources);
-
     XDefineCursor(dpy, root, XCreateFontCursor(dpy, XC_left_ptr));
 
     pid_t child = 0;
@@ -97,7 +97,7 @@ int main(int argc, char *argv[])
                 else if (ev.xkey.subwindow)
                 {
                     if (ev.xkey.keycode == full)
-                        full_screen(ev.xkey.subwindow, ress);
+                        full_screen(ev.xkey.subwindow);
 
                     else if (ev.xkey.keycode == kill)
                         XKillClient(dpy, ev.xkey.subwindow);
