@@ -10,6 +10,13 @@ Window root;
 XRRScreenResources* sres;
 bool done = false;
 
+auto get(KeySym sym){ return XKeysymToKeycode(dpy, sym); };
+void grab(KeyCode code){ XGrabKey(dpy, code, Mod4Mask, root, True, GrabModeAsync, GrabModeAsync); };
+
+void grab(int button, int mask){ XGrabButton(dpy, button, mask, root, True,
+    ButtonPressMask|ButtonReleaseMask|PointerMotionMask, GrabModeAsync, GrabModeAsync, None, None);
+};
+
 void full_screen(Window win)
 {
     XWindowAttributes wa;
@@ -49,24 +56,11 @@ int main(int argc, char *argv[])
         return 1;
     }
 
-    XGrabButton(dpy, Button1, Mod4Mask, root, True,
-        ButtonPressMask|ButtonReleaseMask|PointerMotionMask, GrabModeAsync, GrabModeAsync,
-        None, None
-    );
-    XGrabButton(dpy, Button1, Mod4Mask|ShiftMask, root, True,
-        ButtonPressMask|ButtonReleaseMask|PointerMotionMask, GrabModeAsync, GrabModeAsync,
-        None, None
-    );
+    const auto full = get(XK_f), next = get(XK_Tab), kill = get(XK_k), quit = get(XK_q);
+    for (auto code : {full, next, kill, quit}) grab(code);
 
-    const auto full = XKeysymToKeycode(dpy, XK_f);
-    const auto next = XKeysymToKeycode(dpy, XK_Tab);
-    const auto kill = XKeysymToKeycode(dpy, XK_k);
-    const auto quit = XKeysymToKeycode(dpy, XK_q);
-
-    for (auto code : { full, next, kill, quit })
-    {
-        XGrabKey(dpy, code, Mod4Mask, root, True, GrabModeAsync, GrabModeAsync);
-    }
+    grab(Button1, Mod4Mask);
+    grab(Button1, Mod4Mask|ShiftMask);
 
     XButtonEvent move{.subwindow = None};
     XWindowAttributes attrs;
