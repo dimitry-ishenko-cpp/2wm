@@ -1,4 +1,5 @@
 #include <initializer_list>
+#include <memory>
 
 #include <sys/select.h> // select
 #include <sys/syscall.h> // pidfd_open, syscall
@@ -18,6 +19,8 @@ void grab(int button, int mask){ XGrabButton(dpy, button, mask, root, True,
     ButtonPressMask|ButtonReleaseMask|PointerMotionMask, GrabModeAsync, GrabModeAsync, None, None);
 };
 
+using crtc_info = std::unique_ptr<XRRCrtcInfo, void(*)(XRRCrtcInfo*)>;
+
 void full_screen(Window win)
 {
     XWindowAttributes wa;
@@ -27,19 +30,13 @@ void full_screen(Window win)
     auto cy = wa.y + wa.height / 2;
 
     for (auto i = 0; i < sres->ncrtc; ++i)
-        if (auto ci = XRRGetCrtcInfo(dpy, sres, sres->crtcs[i]))
-        {
+        if (auto ci = crtc_info(XRRGetCrtcInfo(dpy, sres, sres->crtcs[i]), &XRRFreeCrtcInfo))
             if (ci->noutput > 0)
-            {
                 if (cx >= ci->x && cx < ci->x + ci->width && cy >= ci->y && cy < ci->y + ci->height)
                 {
                     XMoveResizeWindow(dpy, win, ci->x, ci->y, ci->width, ci->height);
-                    XRRFreeCrtcInfo(ci);
                     break;
                 }
-            }
-            XRRFreeCrtcInfo(ci);
-        }
 }
 
 int main(int argc, char *argv[])
