@@ -11,5 +11,7 @@ include(GNUInstallDirs)
 
 add_executable(2wm 2wm.cpp)
 target_link_libraries(2wm PRIVATE PkgConfig::x11 PkgConfig::xrandr)
+install(TARGETS 2wm DESTINATION ${CMAKE_INSTALL_LIBEXECDIR})
 
-install(TARGETS 2wm DESTINATION ${CMAKE_INSTALL_BINDIR})
+configure_file(2wm.sh.in 2wm.sh)
+install(PROGRAMS ${CMAKE_CURRENT_BINARY_DIR}/2wm.sh DESTINATION ${CMAKE_INSTALL_BINDIR} RENAME 2wm)

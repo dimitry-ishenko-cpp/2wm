@@ -1,0 +1,2 @@
+#!/bin/sh
+exec startx @CMAKE_INSTALL_FULL_LIBEXECDIR@/2wm "$@"
