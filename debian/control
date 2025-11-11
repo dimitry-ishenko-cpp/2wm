@@ -1,0 +1,24 @@
+Source: 2wm
+Section: x11
+Priority: optional
+Maintainer: Dimitry Ishenko <dimitry.ishenko@gmail.com>
+Rules-Requires-Root: no
+Build-Depends:
+ debhelper-compat (= 13),
+ cmake,
+ libx11-dev,
+ libxrandr-dev,
+ pkgconf,
+Standards-Version: 4.6.2
+Homepage: https://github.com/dimitry-ishenko-cpp/2wm
+Vcs-Browser: https://github.com/dimitry-ishenko-cpp/2wm
+Vcs-Git: https://github.com/dimitry-ishenko-cpp/2wm.git
+
+Package: 2wm
+Architecture: any
+Depends:
+ ${shlibs:Depends},
+ ${misc:Depends},
+Description: 2wm — two-bit Window Manager
+  2wm is a tiny X11 window manager inspired by tinywm and 1wm designed to
+  provide a minimalistic graphical experience.
