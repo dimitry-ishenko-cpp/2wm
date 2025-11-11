@@ -71,12 +71,12 @@ int main(int argc, char *argv[])
     for (bool done = false; !done;)
     {
         FD_ZERO(&fds);
-        if (fd_c > 0) FD_SET(fd_c, &fds);
+        if (child) FD_SET(fd_c, &fds);
         FD_SET(fd_x, &fds);
 
         XFlush(dpy);
         select(fd_max + 1, &fds, NULL, NULL, NULL);
-        if (FD_ISSET(fd_c, &fds)) done = true;
+        if (child && FD_ISSET(fd_c, &fds)) done = true;
 
         while (XPending(dpy))
         {
